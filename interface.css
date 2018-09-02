@@ -1,0 +1,349 @@
+html, body {
+	margin: 0px;
+	height:100%;
+	width:100%;
+	text-align: center;
+	overflow-x:hidden;
+	font-size: 14px;
+	font-family: Arial;
+}
+#mainTitle {
+	height:35px !important;
+	margin:0px;
+	font-size: 35px;
+}
+#subTitle {
+	position: absolute;
+	right: 20px;
+	height:50px;
+	top:5px;
+	font-size: 14px;
+	border-radius: 50%;
+	cursor: pointer;
+	float: none;
+
+}
+.label {
+	text-align: left;
+	font-size: 12px;
+}
+#infoDiv {
+	position: absolute;
+	padding:2em;
+	bottom:25%;
+	width:80%;
+	left:10%;
+	background-color: rgba(250,250,250,0.9);
+	z-index: 1000;
+	opacity: 0;
+	transition: all 0.5s ease-out;
+	box-shadow: 0em 0.2em 0.2em 0.2em rgba(0,0,0,0.5);
+}
+#info {
+	position: absolute;
+	left: 20px;
+	height:50px;
+	top:5px;
+	font-size: 14px;
+	border-radius: 50%;
+	cursor: pointer;
+}
+.infoBut {
+	position: absolute;
+	right: 5px;
+	top: 1px;
+	width:20px;
+	height:20px;
+	background-color: rgba(250,250,250,0.2);
+	border-radius: 10px;
+
+
+}
+.infoBut:hover {
+	background-color: rgba(0,0,0,0.4);
+}
+#worldMap {
+	width:100%;
+	height:100%;
+	fill:rgba(0,0,0,0);
+	position: absolute;
+	top: 100px;
+	display: none;
+	left: 0;
+}
+#playButton {
+	float: left;
+	/*position: absolute;
+	top: 50px;
+	left: 50px;*/
+	width:40%;
+	margin-left:5%;
+	margin-top:10px;
+	margin-bottom:10px;
+	height:30px;
+	background-color: rgba(0,0,0,0.2);
+	box-sizing: border-box;
+	border-radius: 0.4em;
+	text-align: center;
+	padding-top:5px;
+	padding-bottom:5px;
+	cursor: pointer;
+}
+
+#playButton:hover {
+	background-color:  rgba(0,0,0,0.3);
+}
+.infoSpan {
+	display: none;
+}
+.resetBut {
+	cursor: pointer;
+}
+#resetButton {
+	float: left;
+	/*position: absolute;
+	top: 50px;
+	left: 50px;*/
+	width:40%;
+	margin-left:5%;
+	margin-top:10px;
+	margin-bottom:10px;
+	height:30px;
+	background-color: rgba(0,0,0,0.2);
+	box-sizing: border-box;
+	border-radius: 0.4em;
+	text-align: center;
+	padding-top:5px;
+	padding-bottom:5px;
+	cursor: pointer;
+}
+#resetButton:hover {
+	background-color:  rgba(0,0,0,0.3);
+}
+.collapser {
+	background-color: rgba(0,0,0,0.1);
+	height:25px;
+	font-size: 15px;
+	padding-top: 2.5px;
+	padding-bottom: 2.5px;
+	box-sizing: border-box;
+	cursor: pointer;
+
+}
+.collapser:hover {
+	background-color: rgba(0,0,0,0.2);
+	height:25px;
+}
+.sp-replacer {
+	float: left;
+	margin-left: 0;
+	height:25px !important;
+	width:25px !important;
+	padding:0px !important;
+	box-sizing:border-box;
+	position: absolute;
+	left:2.5px;
+	top:2.5px;
+}
+.sp-preview {
+	height:25px !important;
+	width:25px !important;
+	margin:0px !important;
+}
+.sp-preview-inner {
+	height:25px !important;
+	width:25px !important;
+}
+.removeCountry {
+	cursor:pointer;
+	float:right;
+	background-color: rgba(0,0,0,0.2);
+	height:25px;
+	width:25px;
+	padding:5px;
+	box-sizing: border-box;
+	border-radius:10px;
+	position: absolute;
+	right:2.5px;
+	top:2.5px;
+	cursor: pointer;
+}
+.removeCountry:hover {
+	
+	background-color: rgba(0,0,0,0);
+}
+.countryContTitle {
+	
+}
+.contTitle {
+	float:none;
+	width:100%;
+	text-align: center;
+}
+.switchCont {
+	float:left;
+	padding:0.2em;
+  margin:0.2em;
+	background-color: rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.3);
+}
+.switchChoice {
+	float:left;
+	background-color: rgba(0,0,0,0.2);
+	margin:0.1em;
+	padding:0.1em;
+	height:50px;
+	width:50px;
+	padding:5px;
+	box-sizing: border-box;
+	border-radius: 0.2em;
+	cursor: pointer;
+
+}
+.switchChoice:hover {
+	background-color: rgba(0,0,0,0.25);
+}
+.switchChoice.chosen {
+	background-color: rgba(255,255,255,0.4);
+}
+.contContainer {
+	width:300px;
+	height:320px;
+	float: left;
+	padding:0.2em;
+  margin:0.2em;
+	background-color: rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.3);
+}
+.container {
+	float: left;
+	height:300px;
+	overflow-y:auto; 
+	width:150px;
+	background-color:rgba(250,250,250,0.5);
+	box-sizing: border-box;
+	padding:0.2em;
+  
+	
+  border:1px solid rgba(255,255,255,0.3);
+}
+.sortBy {
+	float: left;
+}
+.chooseACountry {
+	height:30px;
+	padding:5px;
+	box-sizing: border-box;
+	/*background-color:rgba(0,0,0,0.1);*/
+	cursor: pointer;
+}
+.chooseACountry:hover {
+	background-color:rgba(0,0,0,0.2);
+}
+
+.chosenCountry {
+	position: relative;
+	height:30px;
+	padding:5px;
+	box-sizing: border-box;
+	background-color:rgba(0,0,0,0.1);
+}
+#legend {
+	position: absolute;
+	left: 210px;
+	top:130px;
+	max-height:200px;
+	max-width:200px;
+	background-color: rgba(0,0,0,0.2);
+}
+.legendCountry {
+	position: relative;
+	float:left;
+	width:100px;
+	font-size: 10px;
+	box-sizing: border-box;
+	background-color:rgba(0,0,0,0.1);
+}
+.chosenCountry:hover {
+	background-color:rgba(0,0,0,0.2);
+}
+
+#settingsDiv {
+	position: absolute;
+	top:50px;
+	padding:0.5em;
+	box-sizing: border-box;
+	/*left:150px;*/
+	width:calc(100% );
+	max-height:calc(100% - 50px);
+	transition: all 0.5s ease-out;
+	overflow: hidden;
+	background-color: rgba(250,250,250,0.9);
+	box-shadow: 0em 0.2em 0.2em 0.2em rgba(0,0,0,0.5);
+}
+#descriptionDiv {
+	display: none;
+	position: absolute;
+	z-index: 100000;
+	top:100px;
+	width: 80%;
+	max-height:calc(100% - 200px);
+	overflow-y:auto;
+	left: 10%;
+	background-color: rgba(250,250,250,0.9);
+	box-shadow: 0em 0.2em 0.2em 0.2em rgba(0,0,0,0.5);
+	font-size: 17px;
+	padding:2em;
+	box-sizing: border-box;
+
+}
+li {
+		text-align: left;
+	}
+#closeDescription {
+	box-sizing: border-box;
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	top:10px;
+	left: 10px;
+	background-color: rgba(0,0,0,0.5);
+	border-radius: 15px;
+	text-align: center;
+	font-size: 10px;
+	padding:5px;
+
+}
+#closeDescription:hover {
+	background-color: rgba(0,0,0,0.3);
+}
+canvas {
+	position: absolute;
+	top: 130px;
+	left: 200px;
+	pointer-events: none;
+}
+
+.sliderDiv {
+	position: relative;
+	float: left;
+  padding:0.2em;
+  margin:0.2em;
+	background-color: rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.3);
+  
+}
+.thumbBubble {
+  background-color:rgba(250,250,250,0.3);
+}
+.thumbBubble  span{
+  display:none;
+}
+input {
+	/*margin-left: 20%;
+	width:60%; */
+	box-sizing: border-box; }
+
+.thumbBubble.hovered  input{
+  /*display:block;*/
+}
