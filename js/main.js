@@ -137,13 +137,18 @@ var currentYearVolumeValues = {
 };
 var dotsToSpawnNextTick = 0;
 var imageDots = false;
-
+var isMobile=false;
 svgMap.src = "worldHigh.svg"
 svgMap.onload = function() {
 	start();
 }
 
 function start() {
+
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+ 		isMobile =true;
+	}
+
 	
 	setDims();
 
@@ -157,6 +162,10 @@ function start() {
 
 	loadJSONS(initMenu);
 	
+
+	if(isMobile) {
+		document.getElementById("mainTitle").style.fontSize = "14px"
+	}
 	document.addEventListener("mousemove", handleMouseMove);
 }
 
@@ -165,11 +174,11 @@ function setDims() {
 	windowHeight = window.innerHeight || document.documentElement.clientHeight / 1 || document.body.clientHeight / 1;
 
 	let leftWd = 200;
-	if (hideSideGraphs) {
+	if (hideSideGraphs || isMobile) {
 		leftWd = 0;
 	}
 	let bottomHt = 350;
-	if (hideBottomGraph) {
+	if (hideBottomGraph || isMobile) {
 		bottomHt = 100;
 	}
 	width = Math.floor(windowWidth - leftWd*2);
@@ -575,8 +584,10 @@ function initMenu() {
 	settingsDiv.appendChild(byVal)
 	settingsDiv.appendChild(fillOrStroke)
 	settingsDiv.appendChild(showLegend);
-	settingsDiv.appendChild(drawSideGraphs);
-	settingsDiv.appendChild(drawBottomGraph);
+	if (!isMobile) {
+		settingsDiv.appendChild(drawSideGraphs);
+		settingsDiv.appendChild(drawBottomGraph);
+	}
 	settingsDiv.appendChild(colorChosenOrNot);
 	settingsDiv.appendChild(startYrSlider);
 	settingsDiv.appendChild(endYrSlider);
@@ -1149,10 +1160,10 @@ function draw() {
 	lctx.clearRect(0, 0, 200, height + 200);
 	drawCurrentYear(ctx);
 
-	if (showSideGraphs) {
+	if (showSideGraphs && !isMobile) {
 		drawBarCharts()
 	}
-	if (showBottomGraph) {
+	if (showBottomGraph && !isMobile) {
 		drawBottomChart();
 	}
 
@@ -1442,8 +1453,9 @@ function drawTimeline(ct) {
 		if (i % 5 == 0) {
 			ct.moveTo(40 + (i - startYear) * yearWd, height + (ht-5));
 			ct.lineTo(40 + (i - startYear) * yearWd, height + (ht+5));
-
-			ct.fillText(i, 40 + (i - startYear) * yearWd - wd / 2, height + (ht+20))
+			if (wd < yearWd * 5) {
+				ct.fillText(i, 40 + (i - startYear) * yearWd - wd / 2, height + (ht+20))
+			}
 		} else {
 			ct.moveTo(40 + (i - startYear) * yearWd, height + (ht-2));
 			ct.lineTo(40 + (i - startYear) * yearWd, height + (ht+2));
