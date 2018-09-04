@@ -199,7 +199,7 @@ html, body {
 	float:left;
 	padding:0.2em;
   margin:0.2em;
-  width:125px;
+  width:120px;
   height:110px;
 	background-color: rgba(0,0,0,0.4);
   border:1px solid rgba(255,255,255,0.3);
@@ -216,6 +216,7 @@ html, body {
 	box-sizing: border-box;
 	border-radius: 0.2em;
 	cursor: pointer;
+	white-space: nowrap;
 
 }
 .switchChoice:hover {
@@ -350,6 +351,7 @@ canvas {
 	float: left;
   padding:0.2em;
   margin:0.2em;
+  width:120px;
 	background-color: rgba(0,0,0,0.4);
   border:1px solid rgba(255,255,255,0.3);
   
@@ -364,7 +366,9 @@ input {
 	/*margin-left: 20%;
 	width:60%; */
 	box-sizing: border-box; }
-
+input[type="range" i] {
+	width:100px !important;
+}
 .thumbBubble.hovered  input{
   /*display:block;*/
 }

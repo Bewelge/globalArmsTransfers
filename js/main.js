@@ -107,6 +107,9 @@ var hideSideGraphs=false;
 var showBottomGraph=true;
 var hideBottomGraph=false;
 
+var colorChosen = true;
+var dontColorChosen = false;
+
 var startYear = 1950;
 var endYear = 2017
 
@@ -116,6 +119,7 @@ var settingsCollapsed = true;
 var chosenCountries = {}
 
 var dotRad=2.5;
+var arcRandomness=1;
 
 var images = {};
 var dots = {}
@@ -248,18 +252,20 @@ function loadJSONS(callback) {
 					}
 				}
 				//draw country names on map. Too cluttery
-				/*ctx2.fillStyle="black";
+				ctx2.fillStyle="black";
 				ctx2.font = "6px Arial black";
 				for (let key in allCountriesByVolume) {
-					if (key != "Portugal") continue
-					if (countryLocations[key].airports > 50) {
+					if (key != "Switzerland") continue
+
+
+					
 						let wd = ctx2.measureText(key).width;
 						let pos = getPositionByCoordinates(countryLocations[key].long,countryLocations[key].lat)
 						ctx2.fillText(key,pos.x-wd/2,pos.y)
 						ctx2.fillRect(pos.x-2,pos.y-2,4,4)
-					}
 					
-				}*/
+					
+				}
 				callback();
 			})
 		})
@@ -306,7 +312,7 @@ function initMenu() {
 		max: 1000,
 		step: 1,
 		defaultValue: 150,
-		lab: "Ticks / Year (Speed)",
+		lab: "Ticks / Year",
 		varName: "ticksPerYear",
 		infoTxt: "Into how many ticks each year is split. The speed at which a tick occurs depends entirely on the settings and how quickly your machine can render & update one frame"
 	}).div
@@ -332,7 +338,7 @@ function initMenu() {
 	}).div
 	let dotSizeSlider = createSlider({
 		id: "dotRadSlider",
-		min: 0.1,
+		min: 0.5,
 		max: 10,
 		step: 0.1,
 		defaultValue: 2.5,
@@ -344,6 +350,18 @@ function initMenu() {
 				createImage(key,chosenCountries[key])
 			}
 		}
+	}).div
+
+	let arcRandomnessSlider = createSlider({
+		id: "arcRandomnessSlider",
+		min: 0,
+		max: 250,
+		step: 1,
+		defaultValue: 25,
+		lab: "Arc Randomness",
+		varName: "arcRandomness",
+		infoTxt: "All dots travel on arcs from one country to another. If this value is set to 0, they will all travel on exactly the same line. It gives a nicer visual if there's some randomness.",
+		
 	}).div
 
 	let startYrSlider = createSlider({
@@ -510,6 +528,27 @@ function initMenu() {
 			},*/
 		}
 	})
+	let colorChosenOrNot = createSwitchClick({
+		id: "colorChosen",
+		label: "Color chosen countries",
+		chosen: "colorChosen",
+		infoTxt: "Whether the country shape of chosen countries should be colored on the map.",
+		choices: {
+			colorChosen: {
+				label: "Yes",
+				callback: function() {
+					drawAllChosenCountries();
+				}
+			},
+			dontColorChosen: {
+				label: "No",
+				callback: function() {
+					ctx2.clearRect(0,0,width,height);
+					ctx2.drawImage(svgMap,0,0,width,height);
+				}
+			}
+		}
+	})
 
 	settingsDiv.appendChild(playBut);
 	settingsDiv.appendChild(resetBut);
@@ -525,11 +564,13 @@ function initMenu() {
 	settingsDiv.appendChild(showLegend);
 	settingsDiv.appendChild(drawSideGraphs);
 	settingsDiv.appendChild(drawBottomGraph);
+	settingsDiv.appendChild(colorChosenOrNot);
 	settingsDiv.appendChild(startYrSlider);
 	settingsDiv.appendChild(endYrSlider);
 	settingsDiv.appendChild(speedSlider);
 	settingsDiv.appendChild(maxDotsSlider);
 	settingsDiv.appendChild(dotSizeSlider);
+	settingsDiv.appendChild(arcRandomnessSlider);
 	settingsDiv.appendChild(valDenomSlider);
 
 	document.body.appendChild(settingsDiv)
@@ -652,7 +693,9 @@ function chooseCountry(country) {
 
 	getAllArcsForCountry(country);
 
-	drawSingleCountry(country);
+	if (colorChosen) {
+		drawSingleCountry(country);
+	}
 }
 
 function getAllVolumeValues(country) {
@@ -844,6 +887,9 @@ function removeCountry(country) {
 
 	ctx2.clearRect(0,0,width,height);
 	ctx2.drawImage(svgMap,0,0,width,height);
+	if (colorChosen) {
+		drawAllChosenCountries()
+	}
 	document.getElementById("countryCont").appendChild(newEl)
 }
 
@@ -859,19 +905,22 @@ function spawnDot(country1, country2) {
 		let x2 = allRecipientForCountry[country1][country2].arcX /*(pos1.x + pos2.x) / 2*/
 		let y2 = allRecipientForCountry[country1][country2].arcY /*(pos1.y + pos2.y) / 2*/
 
+		
+
 		if (pos1.x < pos2.x) {
-			x2 += Math.cos(ang - Math.PI * 0.5) * (10 + dis / (2 + Math.random() * 2))
-			y2 += Math.sin(ang - Math.PI * 0.5) * (10 + dis / (2 + Math.random() * 2))
+			x2 += Math.cos(ang - Math.PI * 0.5) * (arcRandomness * Math.random())
+			y2 += Math.sin(ang - Math.PI * 0.5) * (arcRandomness * Math.random())
 		} else {
-			x2 += Math.cos(ang + Math.PI * 0.5) * (10 + dis / (2 + Math.random() * 2))
-			y2 += Math.sin(ang + Math.PI * 0.5) * (10 + dis / (2 + Math.random() * 2))
+			x2 += Math.cos(ang + Math.PI * 0.5) * (arcRandomness * Math.random())
+			y2 += Math.sin(ang + Math.PI * 0.5) * (arcRandomness * Math.random())
 		}
+
 		if (!dots.hasOwnProperty(country1)) {
 			dots[country1] = [];
 		}
 		dots[country1].push([chosenCountries[country1], 0, dis, pos1.x, pos1.y, pos2.x, pos2.y, x2, y2, (dotRad)])
 	} catch (e) {
-		console.log(country1, country2)
+		console.log(e,country1, country2)
 	}
 }
 
@@ -1094,6 +1143,7 @@ function draw() {
 	}
 
 
+	//for each country
 	loop1:
 		for (let key in dots) {
 			if (dots[key].length == 0) continue
@@ -1103,9 +1153,14 @@ function draw() {
 				ctx.lineWidth = 1;
 				ctx.beginPath();
 			}
+			//each dot of each country
 			for (let kei = dots[key].length - 1; kei >= 0; kei--) {
 				let d = dots[key][kei];
-				d[1] += Math.min(Math.max(3, (d[2] - d[1]) / 50));
+
+				//increase distance traveled
+				d[1] += Math.max(3, (d[2] - d[1]) / 50);
+
+				//target reached
 				if (d[1] > d[2]) {
 					dots[key].splice(kei, 1);
 					if (dots[key].length <= 0) {
@@ -1115,16 +1170,17 @@ function draw() {
 				} else {
 
 
+					//calculate pos on arc.
 					let t = d[1] / d[2];
 					let t2 = t*t;
 					let ti2 = (1-t)*(1-t);
 					let tit2 = (1-t)*2*t;
 					let x = Math.floor(ti2 * d[3] + tit2 * d[7] + t2 * d[5]);
 					let y = Math.floor(ti2 * d[4] + tit2 * d[8] + t2 * d[6]);
+					
 					if (imageDots) {
 						ctx.drawImage(images[key], x - 5, y - 5);
 					} else {
-
 						ctx.moveTo(x, y);
 						ctx.arc(x, y, d[9], 0, Math.PI * 2, 0);
 					}
