@@ -365,7 +365,12 @@ canvas {
 input {
 	/*margin-left: 20%;
 	width:60%; */
-	box-sizing: border-box; }
+	box-sizing: border-box; 
+}
+.sliderTxtInput {
+	width: 60% !important;
+	text-align: center;
+}
 input[type="range" i] {
 	width:100px !important;
 }

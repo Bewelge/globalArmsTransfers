@@ -2004,6 +2004,7 @@ function createSlider(opts) {
 	bubSpan.innerHTML = defaultValue;
 	let bubInp = document.createElement("input");
 	bubInp.id = id + "Input"
+	bubInp.className = "sliderTxtInput"
 	bubInp.type = "number";
 	bubInp.value = defaultValue;
 	bubInp.min = min;
