@@ -120,6 +120,7 @@ var chosenCountries = {}
 
 var dotRad=2.5;
 var arcRandomness=1;
+var dotSpeed=50;
 
 var images = {};
 var dots = {}
@@ -364,6 +365,18 @@ function initMenu() {
 		
 	}).div
 
+	let dotSpeedSlider = createSlider({
+		id: "dotSpeedSlider",
+		min: 10,
+		max: 100,
+		step: 1,
+		defaultValue: 50,
+		lab: "Dot Speed",
+		varName: "dotSpeed",
+		infoTxt: "How quickly the dots travel. Note that it might get crowded and laggy if it's set too low and the tick/year setting is also low.",
+		
+	}).div
+
 	let startYrSlider = createSlider({
 		id: "startYearSlider",
 		min: 1949,
@@ -570,6 +583,7 @@ function initMenu() {
 	settingsDiv.appendChild(speedSlider);
 	settingsDiv.appendChild(maxDotsSlider);
 	settingsDiv.appendChild(dotSizeSlider);
+	settingsDiv.appendChild(dotSpeedSlider);
 	settingsDiv.appendChild(arcRandomnessSlider);
 	settingsDiv.appendChild(valDenomSlider);
 
@@ -1158,7 +1172,7 @@ function draw() {
 				let d = dots[key][kei];
 
 				//increase distance traveled
-				d[1] += Math.max(3, (d[2] - d[1]) / 50);
+				d[1] += Math.max(3, (d[2] - d[1]) / 50) * dotSpeed / 50;
 
 				//target reached
 				if (d[1] > d[2]) {
