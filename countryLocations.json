@@ -28,8 +28,8 @@
 		"country": "Canada",
 		"code1": "YAM",
 		"code2": "CYAM",
-		"long": -93.3463071853321,
-		"lat": 51.54314431433634
+		"long": -105.3463071853321,
+		"lat": 59.54314431433634
 	},
 	"Algeria": {
 		"airports": 47,
@@ -260,8 +260,8 @@
 		"country": "South Africa",
 		"code1": "ALJ",
 		"code2": "FAAB",
-		"long": 26.70445372917555,
-		"lat": -28.09093382171243
+		"long": 24.70445372917555,
+		"lat": -30.09093382171243
 	},
 	"Botswana": {
 		"airports": 37,
@@ -380,8 +380,8 @@
 		"country": "Madagascar",
 		"code1": "TNR",
 		"code2": "FMMI",
-		"long": 44.209856325092936,
-		"lat": -16.784385406794243
+		"long": 46.209856325092936,
+		"lat": -20.784385406794243
 	},
 	"Angola": {
 		"airports": 27,
@@ -420,8 +420,8 @@
 		"country": "Seychelles",
 		"code1": "\\N",
 		"code2": "FSAL",
-		"long": 53.16966887413441,
-		"lat": -6.440118902945779
+		"long": 56.16966887413441,
+		"lat": -5.440118902945779
 	},
 	"Chad": {
 		"airports": 7,
@@ -1084,7 +1084,7 @@
 		"country": "New Zealand",
 		"code1": "AKL",
 		"code2": "NZAA",
-		"long": 170.8025740694882,
+		"long": 172.8025740694882,
 		"lat": -41.572447670711306
 	},
 	"NATO": {
@@ -1276,15 +1276,15 @@
 		"country": "Taiwan",
 		"code1": "KNH",
 		"code2": "RCBS",
-		"long": 120.91105415535425,
-		"lat": 24.18293153924166
+		"long": 121.51105415535425,
+		"lat": 22.18293153924166
 	},
 	"Japan": {
 		"airports": 204,
 		"country": "Japan",
 		"code1": "NRT",
 		"code2": "RJAA",
-		"long": 135.8648302872276,
+		"long": 137.8648302872276,
 		"lat": 34.75705326383051
 	},
 	"South Korea": {
@@ -1293,7 +1293,7 @@
 		"code1": "KWJ",
 		"code2": "RKJJ",
 		"long": 128.38031649449644,
-		"lat": 36.912912746149935
+		"lat": 35.512912746149935
 	},
 	"Philippines": {
 		"airports": 68,
@@ -1324,7 +1324,7 @@
 		"country": "Chile",
 		"code1": "ARI",
 		"code2": "SCAR",
-		"long": -72.1138482862543,
+		"long": -70.1138482862543,
 		"lat": -37.1516928788388
 	},
 	"Ecuador": {
@@ -1332,7 +1332,7 @@
 		"country": "Ecuador",
 		"code1": "ATF",
 		"code2": "SEAM",
-		"long": -80.60792134540866,
+		"long": -78.60792134540866,
 		"lat": -1.349213686155289
 	},
 	"Paraguay": {
@@ -1388,7 +1388,7 @@
 		"country": "Uruguay",
 		"code1": "\\N",
 		"code2": "SUAA",
-		"long": -49.49224432623323,
+		"long": -55.49224432623323,
 		"lat": -33.379834414680815
 	},
 	"Venezuela": {
@@ -1788,7 +1788,7 @@
 		"country": "China",
 		"code1": "PEK",
 		"code2": "ZBAA",
-		"long": 112.59443163674463,
+		"long": 100.59443163674463,
 		"lat": 33.37626168615046
 	},
 	"North Korea": {

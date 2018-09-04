@@ -87,8 +87,10 @@ var armsTransfers = {};
 var valueDenominator = 1;
 
 var ticksPerYear = 150;
-var maxDots = 50000;
+var maxDots = 10000;
 var allCountriesByVolume = {};
+var allRecipientForCountry={};
+var countryShapes={};
 
 var byVolume = false;
 var byValue = true;
@@ -99,6 +101,12 @@ var fillDots = true;
 var showLegend=true;
 var hideLegend=false;
 
+var showSideGraphs=true;
+var hideSideGraphs=false;
+
+var showBottomGraph=true;
+var hideBottomGraph=false;
+
 var startYear = 1950;
 var endYear = 2017
 
@@ -106,6 +114,8 @@ var svgMap = new Image();
 var paused = true;
 var settingsCollapsed = true;
 var chosenCountries = {}
+
+var dotRad=2.5;
 
 var images = {};
 var dots = {}
@@ -135,7 +145,7 @@ function start() {
 	createCanvases()
 
 
-	ctx2.drawImage(svgMap, 0, 0, width, height);
+	ctx2.drawImage(svgMap, 0, 0, width, height);	
 
 
 	drawTimeline(ctx2);
@@ -149,16 +159,50 @@ function setDims() {
 	windowWidth = window.innerWidth || document.documentElement.clientWidth / 1 || document.body.clientWidth
 	windowHeight = window.innerHeight || document.documentElement.clientHeight / 1 || document.body.clientHeight / 1;
 
-	width = Math.floor(windowWidth - 400);
-	height = Math.floor(windowHeight - 250);
+	let leftWd = 200;
+	if (hideSideGraphs) {
+		leftWd = 0;
+	}
+	let bottomHt = 350;
+	if (hideBottomGraph) {
+		bottomHt = 100;
+	}
+	width = Math.floor(windowWidth - leftWd*2);
+	height = Math.floor(windowHeight - bottomHt);
 	let totLong = Math.abs(rightLongitude) + leftLongitude;
 	let totLat = Math.abs(bottomLatitude) + topLatitude;
 
 
-	scale = Math.min(width / 1009.673, height / 665.963);
+	scale = width / 1009.673;//Math.min(width / 1009.673, height / 665.963);
 
 	width = scale * 1009.673
 	height = scale * 665.963
+
+	if (bgCanvas) {
+		bgCanvas.width = width;
+		bgCanvas.height = height + bottomHt/2;
+		bgCanvas.style.left = (windowWidth - width) / 2 + "px";
+	}
+	if (bgCanvas2) {
+		bgCanvas2.width = width;
+		bgCanvas2.height = height + bottomHt/2;	
+		bgCanvas2.style.left = (windowWidth - width) / 2 + "px";
+	}
+	if (rightCanvas) {
+		rightCanvas.width = 200;
+		rightCanvas.height = height + bottomHt/2;
+	}
+	if (leftCanvas) {
+		leftCanvas.width = 200;
+		leftCanvas.height = height + bottomHt/2;
+	}
+
+	if (bgCanvas2) {
+		ctx2.drawImage(svgMap, 0, 0, width, height);
+		drawTimeline(ctx2);
+	}
+
+	getAllCountryPositions();
 }
 function createCanvases() {
 	//Everything dynamic that is drawn every frame.
@@ -167,7 +211,7 @@ function createCanvases() {
 	ctx = bgCanvas.getContext("2d");
 
 	//map is drawn once. Never cleared.
-	bgCanvas2 = createCanvas(width, height + 175, 0, 0, "cnv1", "cnv", (windowWidth - width) / 2, 130, true);
+	bgCanvas2 = createCanvas(width, height + 175, 0, 0, "cnv2", "cnv", (windowWidth - width) / 2, 130, true);
 	bgCanvas2.style.zIndex = -11;
 	ctx2 = bgCanvas2.getContext("2d");
 
@@ -186,35 +230,38 @@ function createCanvases() {
 function loadJSONS(callback) {
 	$.getJSON("countryLocations.json", function(json1) {
 		countryLocations = json1;
+		getAllCountryPositions();
+		$.getJSON("countryShapes.json", function(json2) {
+			countryShapes = json2;		
+			$.getJSON("armsTransfers.json", function(json3) {
 
-		$.getJSON("armsTransfers.json", function(json3) {
+				armsTransfers = json3;
 
-			armsTransfers = json3;
-
-			for (let key in armsTransfers) {
-				allCountriesByVolume[key] = 0;
-				for (let yr in armsTransfers[key]) {
-					for (let cntr2 in armsTransfers[key][yr]) {
-						for (let transfer in armsTransfers[key][yr][cntr2]) {
-							allCountriesByVolume[key] += parseFloat(armsTransfers[key][yr][cntr2][transfer][1]);
+				for (let key in armsTransfers) {
+					allCountriesByVolume[key] = 0;
+					for (let yr in armsTransfers[key]) {
+						for (let cntr2 in armsTransfers[key][yr]) {
+							for (let transfer in armsTransfers[key][yr][cntr2]) {
+								allCountriesByVolume[key] += parseFloat(armsTransfers[key][yr][cntr2][transfer][1]);
+							}
 						}
 					}
 				}
-			}
-			//draw country names on map. Too cluttery
-			/*ctx2.fillStyle="black";
-			ctx2.font = "6px Arial black";
-			for (let key in allCountriesByVolume) {
-				if (key != "Portugal") continue
-				if (countryLocations[key].airports > 50) {
-					let wd = ctx2.measureText(key).width;
-					let pos = getPositionByCoordinates(countryLocations[key].long,countryLocations[key].lat)
-					ctx2.fillText(key,pos.x-wd/2,pos.y)
-					ctx2.fillRect(pos.x-2,pos.y-2,4,4)
-				}
-				
-			}*/
-			callback();
+				//draw country names on map. Too cluttery
+				/*ctx2.fillStyle="black";
+				ctx2.font = "6px Arial black";
+				for (let key in allCountriesByVolume) {
+					if (key != "Portugal") continue
+					if (countryLocations[key].airports > 50) {
+						let wd = ctx2.measureText(key).width;
+						let pos = getPositionByCoordinates(countryLocations[key].long,countryLocations[key].lat)
+						ctx2.fillText(key,pos.x-wd/2,pos.y)
+						ctx2.fillRect(pos.x-2,pos.y-2,4,4)
+					}
+					
+				}*/
+				callback();
+			})
 		})
 	})
 }
@@ -268,7 +315,7 @@ function initMenu() {
 		min: 500,
 		max: 100000,
 		step: 100,
-		defaultValue: 50000,
+		defaultValue: 10000,
 		lab: "Max Dots",
 		varName: "maxDots",
 		infoTxt: "The maximum amount of dots allowed at once on screen. If it's set low together with a low tick speed, the dots will spawn in bursts."
@@ -283,6 +330,22 @@ function initMenu() {
 		varName: "valueDenominator",
 		infoTxt: "How much each dot is worth. Note that a transfer worth 0.5 will not be shown if you set the value higher than 0.5. It will not add up over the years. Going lower than 1 will become very laggy though if you include one of the big arms exporters."
 	}).div
+	let dotSizeSlider = createSlider({
+		id: "dotRadSlider",
+		min: 0.1,
+		max: 10,
+		step: 0.1,
+		defaultValue: 2.5,
+		lab: "Dot Radius",
+		varName: "dotRad",
+		infoTxt: "The radius of the dots.",
+		callback: function() {
+			for (let key in chosenCountries) {
+				createImage(key,chosenCountries[key])
+			}
+		}
+	}).div
+
 	let startYrSlider = createSlider({
 		id: "startYearSlider",
 		min: 1949,
@@ -343,6 +406,7 @@ function initMenu() {
 		id: "dotsByWhat",
 		label: "Spawn dots...",
 		chosen: "byValue",
+		infoTxt: "Decides what constitutes a dot. </br> <b>By Volume</b> will spawn one dot for each 'item' delivered. So an Aircraft carrier will look the same as a helicopter or a missile </br> <b>By value</b> means that the amount of dots will depend on the value of the transfer. You can specify the Value / Dot yourself in the settings. The TIV (Trend-Indicator Value) is used for the value of each transfer, which is a figure created by SIPRI that <a href='https://www.sipri.org/databases/armstransfers/background#TIV-tables'>'[...] is based on the known unit production costs of a core set of weapons and is intended to represent the transfer of military resources rather than the financial value of the transfer.'</a>",
 		choices: {
 			byValue: {
 				label: "...by Value",
@@ -363,6 +427,7 @@ function initMenu() {
 		id: "showLegend",
 		label: "Legend",
 		chosen: "showLegend",
+		infoTxt: "Show or Hide the Legend on the top left.",
 		choices: {
 			showLegend: {
 				label: "Show",
@@ -379,10 +444,57 @@ function initMenu() {
 		}
 	})
 
+	let drawSideGraphs = createSwitchClick({
+		id: "drawSideGraphs",
+		label: "Side Graphs",
+		chosen: "showSideGraphs",
+		infoTxt: "Show or Hide the Graphs on the left and right. Hiding them might increase performance.",
+		choices: {
+			showSideGraphs: {
+				label: "Show",
+				callback: function() {
+					setDims();
+					//$("#legend").fadeIn();
+				}
+			},
+			hideSideGraphs: {
+				label: "Hide",
+				callback: function() {
+					setDims();
+					//$("#legend").fadeOut();
+				}
+			}
+		}
+	})
+
+	let drawBottomGraph = createSwitchClick({
+		id: "drawBottomGraph",
+		label: "Bottom Graph",
+		chosen: "showBottomGraph",
+		infoTxt: "Show or Hide the bottom Graph. Hiding it might increase performance.",
+		choices: {
+			showBottomGraph: {
+				label: "Show",
+				callback: function() {
+					setDims();
+					//$("#legend").fadeIn();
+				}
+			},
+			hideBottomGraph: {
+				label: "Hide",
+				callback: function() {
+					setDims();
+					//$("#legend").fadeOut();
+				}
+			}
+		}
+	})
+
 	let fillOrStroke = createSwitchClick({
 		id: "drawDots",
 		label: "Draw dots...",
 		chosen: "fillDots",
+		infoTxt: "How the dots are rendered. </br> <b>Fill</b> will simply fill all dots with the respecitve color. This the probably the most performant setting if there are many dots.  </br> <b>Stroke</b> will stroke the dots (drawing outline). Gives a nice visual effect but is less performant than fill. </br> <b>Image</b> will create an image of a dot and use context.drawImage(), which promises to make use of GPU acceleration and allows us to use a nice gradient within the dot. Performance might be better or worse than Fill",
 		choices: {
 			fillDots: {
 				label: "...with Fill"
@@ -410,11 +522,14 @@ function initMenu() {
 
 	settingsDiv.appendChild(byVal)
 	settingsDiv.appendChild(fillOrStroke)
-	settingsDiv.appendChild(showLegend)
+	settingsDiv.appendChild(showLegend);
+	settingsDiv.appendChild(drawSideGraphs);
+	settingsDiv.appendChild(drawBottomGraph);
 	settingsDiv.appendChild(startYrSlider);
 	settingsDiv.appendChild(endYrSlider);
 	settingsDiv.appendChild(speedSlider);
 	settingsDiv.appendChild(maxDotsSlider);
+	settingsDiv.appendChild(dotSizeSlider);
 	settingsDiv.appendChild(valDenomSlider);
 
 	document.body.appendChild(settingsDiv)
@@ -444,6 +559,11 @@ function play(but) {
 	paused = false;
 	but.innerHTML = "Pause"
 	tick();
+	if (settingsCollapsed) {
+		settingsCollapsed = false
+		settingsDiv.style.maxHeight = "75px";
+		settingsDiv.style.boxShadow = "none"
+	}
 	but.onclick = function() {
 		pause(but);
 	}
@@ -459,7 +579,7 @@ function pause(but) {
 
 function tick() {
 	//only tick if not too many dots
-	if (dotSum() < maxDots - dotsToSpawnNextTick) {
+	if (dotSum() <= maxDots - dotsToSpawnNextTick) {
 		dotsToSpawnNextTick = 0;
 		if (currentYear < endYear) {
 			ticker++;
@@ -492,14 +612,24 @@ function tick() {
 			}
 		}
 	} else if (dotSum() == 0) {
-		//if too many dots are to be spawned, slow it down x10.
-		ticker += 0.1;
+		//if too many dots are to be spawned, slow it down appropriately.
+		let dif = (maxDots/5) / dotsToSpawnNextTick;
+		ticker += dif;
+		dotsToSpawnNextTick*=dif
 	}
 	draw();
 	if (currentYear == endYear && dotSum() == 0) {
 		reset();
 	} else if ((currentYear < endYear + 1 || dotSum() > 0) && !paused) {
 		window.requestAnimationFrame(tick);
+	}
+}
+
+function getAllCountryPositions() {
+	for (let cntr in countryLocations) {
+		let pos = getPositionByCoordinates(countryLocations[cntr].long,countryLocations[cntr].lat) 
+		countryLocations[cntr].x = pos.x;
+		countryLocations[cntr].y = pos.y;
 	}
 }
 
@@ -514,6 +644,18 @@ function chooseCountry(country) {
 	createImage(country, col);
 
 	//init all values per year now to free up some power for when the animation actually runs.
+	getAllVolumeValues(country);
+
+
+
+	getAllRecipientsForCountry(country);
+
+	getAllArcsForCountry(country);
+
+	drawSingleCountry(country);
+}
+
+function getAllVolumeValues(country) {
 	for (let i = startYear; i < endYear; i++) {
 		for (let cntr2 in armsTransfers[country][i]) {
 			for (let transfer in armsTransfers[country][i][cntr2]) {
@@ -523,7 +665,117 @@ function chooseCountry(country) {
 		}
 	}
 }
+function getAllRecipientsForCountry(country) {
+	allRecipientForCountry[country] = {};
+	for (let yr in armsTransfers[country]) {
+		for (let recip in armsTransfers[country][yr]) {
+			if (!allRecipientForCountry[country].hasOwnProperty(recip)) {
+				allRecipientForCountry[country][recip]={volume:0,value:0};
+			}
+			for (let trans in armsTransfers[country][yr][recip]) {
+				let vol = parseFloat(armsTransfers[country][yr][recip][trans][0]);
+				let val = parseFloat(armsTransfers[country][yr][recip][trans][1]);
+				if (!isNaN(vol)) {
+					allRecipientForCountry[country][recip].volume += vol;
+				}
+				if (!isNaN(val)) {
+					allRecipientForCountry[country][recip].value  += val;
+					
+				}
+			}
+		}
+	}
 
+	for (let recip in allRecipientForCountry[country]) {
+		if (allRecipientForCountry[country][recip].volume + allRecipientForCountry[country][recip].value == 0) {
+			delete allRecipientForCountry[country][recip];
+		}
+	}
+}
+
+function getAllArcsForCountry(country) {
+	let takenPositions=[];
+	for (let recip in allRecipientForCountry[country]) {
+		let pos1 = {x:countryLocations[country].x,y:countryLocations[country].y};
+		let pos2 = {x:countryLocations[recip].x,y:countryLocations[recip].y};
+		let x2 = (pos1.x + pos2.x) / 2;
+		let y2 = (pos1.y + pos2.y) / 2;
+		let ang = angle(pos1.x,pos1.y,pos2.x,pos2.y);
+		let dis = Distance(pos1.x,pos1.y,pos2.x,pos2.y);
+		
+		let rnd = Math.random();
+
+		// will change upward/downward arc depending on whether: its left/right of screen middle, cntr1 is left/right of cntr2 and cntr1 is upwards/downwards of cntr2.
+		let angDiff = (Math.abs(width/2 - pos1.x) / (width/2 - pos1.x)) * (Math.abs(pos1.x - pos2.x) / (pos1.x - pos2.x)) * (Math.abs(pos1.y - pos2.y) / (pos1.y - pos2.y)) * Math.PI*0.5
+		
+
+		let arcPos = {
+			x:x2 + Math.cos(ang + angDiff) *  (20 + dis * ( 0.2 + 0.4 * Math.random())),
+			y:y2 + Math.sin(ang + angDiff) *  (20 + dis * ( 0.2 + 0.4 * Math.random())) ,
+		}
+
+		//attempt to automaticaly even out arcs. Doesn't work very well...
+		/*let dis1 = 100000;
+		for (let key in allRecipientForCountry[country]) {
+			if (key != recip && allRecipientForCountry[country][key].hasOwnProperty("arcX")) {
+				let dis2 = Distance(allRecipientForCountry[country][key].arcX,allRecipientForCountry[country][key].arcY,pos1.x,pos1.y) 
+				if (dis1 > dis2) {
+					dis1 = dis2; 
+					
+				}
+			}
+		}
+		while (dis1 < 25) {
+			angDiff*= (Math.random() - Math.random())
+			arcPos.x+= (Math.random() - Math.random()) * 10;
+			arcPos.y+= (Math.random() - Math.random()) * 10;
+
+			for (let key in allRecipientForCountry[country]) {
+				if (key != recip && allRecipientForCountry[country][key].hasOwnProperty("arcX")) {
+					let dis2 = Distance(allRecipientForCountry[country][key].arcX,allRecipientForCountry[country][key].arcY,pos1.x,pos1.y) 
+					if (dis1 > dis2) {
+						dis1 = dis2; 
+						
+					}
+				}
+			}
+		}*/
+
+
+		allRecipientForCountry[country][recip].arcX = arcPos.x;
+		allRecipientForCountry[country][recip].arcY = arcPos.y;
+		
+	}
+
+	//drawArcs(country);
+}
+function drawAllChosenCountries() {
+	for (let cntr in chosenCountries) {
+		drawSingleCountry(cntr);
+	}
+}
+function drawSingleCountry(country,col) {
+	ctx2.save();
+	ctx2.scale(scale,scale);
+	ctx2.fillStyle= chosenCountries[country];
+	let p = new Path2D(countryShapes[country].d);
+	ctx2.fill(p);
+	ctx2.restore();
+}
+function drawArcs(country) {
+	for (let recip in allRecipientForCountry[country]) {
+		let pos1 = {x:countryLocations[country].x,y:countryLocations[country].y};
+		let pos2 = {x:countryLocations[recip].x,y:countryLocations[recip].y};
+
+		let cPos = {x:allRecipientForCountry[country][recip].arcX,y:allRecipientForCountry[country][recip].arcY};
+
+		ctx.beginPath();
+		ctx.moveTo(pos1.x,pos1.y);
+		ctx.quadraticCurveTo(cPos.x,cPos.y,pos2.x,pos2.y);
+		ctx.stroke();
+		ctx.closePath();
+	}
+}
 //creates legend and chosenCountryDiv(+ remove button + color picker)
 function createChosenCountryDivs(country,col) {
 	let newEl = createDiv("chosen" + country, "chosenCountry", {
@@ -533,8 +785,8 @@ function createChosenCountryDivs(country,col) {
 	let newLegend = createDiv("legend" + country, "legendCountry", {
 		innerHTML: country
 	});
-	newLegend.style.border = "5px solid " + col;
-
+	newLegend.style.border = "3px solid " + col;
+	newLegend.style.backgroundColor = col;
 	let colPick = document.createElement("input");
 	colPick.value = col;
 	colPick.type = "color";
@@ -545,8 +797,8 @@ function createChosenCountryDivs(country,col) {
 		showAlpha: true,
 		change: function(e) {
 			newEl.style.backgroundColor = e.toRgbString();
-			//newLegend.style.backgroundColor = e.toRgbString();
-			newLegend.style.border = "5px solid " + e.toRgbString();
+			newLegend.style.backgroundColor = e.toRgbString();
+			newLegend.style.border = "3px solid " + e.toRgbString();
 			chosenCountries[country] = e.toRgbString();
 			createImage(country, e.toRgbString())
 		}
@@ -563,14 +815,14 @@ function createChosenCountryDivs(country,col) {
 }
 
 function createImage(country, color) {
-	let cn = createCanvas(4, 4);
+	let cn = createCanvas(dotRad*2, dotRad*2);
 	let ct = cn.getContext("2d");
-	let rgr = ct.createRadialGradient(2, 2, 0, 2, 2, 2);
-	rgr.addColorStop(0, "rgba(255,255,255,0.5)");
-	rgr.addColorStop(1, color);
+	let rgr = ct.createRadialGradient(dotRad, dotRad, 0, dotRad, dotRad, dotRad);
+	rgr.addColorStop(0, color);
+	rgr.addColorStop(1, "rgba(255,255,255,1)");
 	ct.fillStyle = rgr;
 	ct.beginPath();
-	ct.arc(2, 2, 2, 0, Math.PI * 2, 0);
+	ct.arc(dotRad, dotRad, dotRad, 0, Math.PI * 2, 0);
 	ct.fill();
 	ct.closePath();
 	images[country] = cn;
@@ -579,6 +831,7 @@ function createImage(country, color) {
 function removeCountry(country) {
 	document.getElementById("chosen" + country).remove();
 	document.getElementById("legend" + country).remove();
+	drawSingleCountry(country,"rgba(0,0,0,0)");
 	if (chosenCountries.hasOwnProperty(country)) {
 		delete chosenCountries[country];
 	}
@@ -588,20 +841,23 @@ function removeCountry(country) {
 			chooseCountry(country)
 		}
 	})
+
+	ctx2.clearRect(0,0,width,height);
+	ctx2.drawImage(svgMap,0,0,width,height);
 	document.getElementById("countryCont").appendChild(newEl)
 }
 
 function spawnDot(country1, country2) {
 	try {
 
-		let pos1 = getPositionByCoordinates(countryLocations[country1].long, countryLocations[country1].lat)
-		let pos2 = getPositionByCoordinates(countryLocations[country2].long, countryLocations[country2].lat)
+		let pos1 = {x:countryLocations[country1].x,y:countryLocations[country1].y};//getPositionByCoordinates(countryLocations[country1].long, countryLocations[country1].lat)
+		let pos2 = {x:countryLocations[country2].x,y:countryLocations[country2].y};//getPositionByCoordinates(countryLocations[country2].long, countryLocations[country2].lat)
 
 		let ang = angle(pos1.x, pos1.y, pos2.x, pos2.y)
 		let dis = Distance(pos1.x, pos1.y, pos2.x, pos2.y)
 
-		let x2 = (pos1.x + pos2.x) / 2
-		let y2 = (pos1.y + pos2.y) / 2
+		let x2 = allRecipientForCountry[country1][country2].arcX /*(pos1.x + pos2.x) / 2*/
+		let y2 = allRecipientForCountry[country1][country2].arcY /*(pos1.y + pos2.y) / 2*/
 
 		if (pos1.x < pos2.x) {
 			x2 += Math.cos(ang - Math.PI * 0.5) * (10 + dis / (2 + Math.random() * 2))
@@ -613,7 +869,7 @@ function spawnDot(country1, country2) {
 		if (!dots.hasOwnProperty(country1)) {
 			dots[country1] = [];
 		}
-		dots[country1].push([chosenCountries[country1], 0, dis, pos1.x, pos1.y, pos2.x, pos2.y, x2, y2, Math.random() * 1 + 0.5])
+		dots[country1].push([chosenCountries[country1], 0, dis, pos1.x, pos1.y, pos2.x, pos2.y, x2, y2, (dotRad)])
 	} catch (e) {
 		console.log(country1, country2)
 	}
@@ -830,8 +1086,12 @@ function draw() {
 	lctx.clearRect(0, 0, 200, height + 200);
 	drawCurrentYear(ctx);
 
-	drawBarCharts()
-	drawBottomChart();
+	if (showSideGraphs) {
+		drawBarCharts()
+	}
+	if (showBottomGraph) {
+		drawBottomChart();
+	}
 
 
 	loop1:
@@ -856,8 +1116,11 @@ function draw() {
 
 
 					let t = d[1] / d[2];
-					let x = (1 - t) * (1 - t) * d[3] + 2 * (1 - t) * t * d[7] + t * t * d[5];
-					let y = (1 - t) * (1 - t) * d[4] + 2 * (1 - t) * t * d[8] + t * t * d[6];
+					let t2 = t*t;
+					let ti2 = (1-t)*(1-t);
+					let tit2 = (1-t)*2*t;
+					let x = Math.floor(ti2 * d[3] + tit2 * d[7] + t2 * d[5]);
+					let y = Math.floor(ti2 * d[4] + tit2 * d[8] + t2 * d[6]);
 					if (imageDots) {
 						ctx.drawImage(images[key], x - 5, y - 5);
 					} else {
@@ -991,18 +1254,14 @@ function drawBottomChart() {
 			let current = 0;
 			if (currentYear > startYear-1) {
 				let val2 = 0
-				try {
+				if (currentYearVolumeValues.sellers.hasOwnProperty(currentYear - 1) && currentYearVolumeValues.sellers[currentYear -1].hasOwnProperty(key)) {
 					val2 = currentYearVolumeValues.sellers[currentYear - 1][key].value;
-				} catch (e) {
-					//console.log(e)
-					//this will always happend bfore the fist year. Too lazy to find better solution.
 				}
 				let nextVal = 0;
-				try {
+				if (currentYearVolumeValues.sellers.hasOwnProperty(currentYear) && currentYearVolumeValues.sellers[currentYear].hasOwnProperty(key)) {
 					nextVal = currentYearVolumeValues.sellers[currentYear][key].value
-				} catch (e) {
-					//console.log(e)
 				}
+
 				current = val2 + ticker / ticksPerYear * (nextVal - val2)
 				
 				if (current > max) {
@@ -1013,7 +1272,10 @@ function drawBottomChart() {
 
 			ctx.strokeStyle = chosenCountries[key];
 			ctx.beginPath();
-			let val = currentYearVolumeValues.sellers[startYear + 1][key].value || 0;
+			let val = 0;
+			if ( currentYearVolumeValues.sellers.hasOwnProperty(startYear+1) && currentYearVolumeValues.sellers[startYear + 1].hasOwnProperty(key)) {
+				val = currentYearVolumeValues.sellers[startYear + 1][key].value;
+			}
 			ctx.moveTo(40, height + 100 )
 			for (let i = startYear + 2; i < currentYear && i < endYear; i++) {
 				if (currentYearVolumeValues.sellers.hasOwnProperty(i) && currentYearVolumeValues.sellers[i].hasOwnProperty(key)) {
@@ -1083,34 +1345,38 @@ function drawTimeline(ct) {
 	ct.lineCap = "round"
 	ct.strokeStyle = "rgba(0,0,0,0.4)";
 	ct.lineWidth = 4;
-	ct.font = "10px Arial black"
+	ct.font = "10px Arial black";
+	let ht = 40;
+	if (showBottomGraph) {
+		ht+=100;
+	}
 	let wd = ct.measureText(1999).width;
 	ct.beginPath();
-	ct.moveTo(40, height + 140);
-	ct.lineTo(width - 40, height + 140);
+	ct.moveTo(40, height + ht);
+	ct.lineTo(width - 40, height + ht);
 
-	ct.moveTo(40, height + 132);
-	ct.lineTo(40, height + 148);
+	ct.moveTo(40, height + (ht-8));
+	ct.lineTo(40, height + (ht+8));
 
-	ct.fillText(startYear, 40 - 1.5 * wd, height + 145)
+	ct.fillText(startYear, 40 - 1.5 * wd, height + (ht+5))
 
-	ct.moveTo(width - 40, height + 132);
-	ct.lineTo(width - 40, height + 148);
+	ct.moveTo(width - 40, height + (ht-8));
+	ct.lineTo(width - 40, height + (ht+8));
 
-	ct.fillText(endYear, width - 40 + 0.5 * wd, height + 145)
+	ct.fillText(endYear, width - 40 + 0.5 * wd, height + (ht+5))
 
 	let totYears = endYear - startYear;
 	let yearWd = (width - 40 - 40) / totYears;
 
 	for (let i = startYear + 1; i < endYear; i++) {
 		if (i % 5 == 0) {
-			ct.moveTo(40 + (i - startYear) * yearWd, height + 135);
-			ct.lineTo(40 + (i - startYear) * yearWd, height + 145);
+			ct.moveTo(40 + (i - startYear) * yearWd, height + (ht-5));
+			ct.lineTo(40 + (i - startYear) * yearWd, height + (ht+5));
 
-			ct.fillText(i, 40 + (i - startYear) * yearWd - wd / 2, height + 160)
+			ct.fillText(i, 40 + (i - startYear) * yearWd - wd / 2, height + (ht+20))
 		} else {
-			ct.moveTo(40 + (i - startYear) * yearWd, height + 138);
-			ct.lineTo(40 + (i - startYear) * yearWd, height + 142);
+			ct.moveTo(40 + (i - startYear) * yearWd, height + (ht-2));
+			ct.lineTo(40 + (i - startYear) * yearWd, height + (ht+2));
 		}
 	}
 
@@ -1182,6 +1448,10 @@ function drawBarCharts() {
 //draw the currentYear pointer over timeline.
 function drawCurrentYear(ct) {
 	if (endYear > currentYear) {
+		let ht = 0;
+		if (showBottomGraph) {
+			ht += 100;
+		}
 		let totYears = endYear - startYear;
 		let yearWd = (width - 40 - 40) / totYears;
 		let x = 40 + (currentYear - startYear - 1) * yearWd + yearWd * ticker / ticksPerYear
@@ -1190,8 +1460,8 @@ function drawCurrentYear(ct) {
 		ct.font = "15px Arial black";
 		ct.fillStyle = "black";
 		let wd = ct.measureText(currentYear).width;
-		ct.fillText(currentYear, x - wd / 2, height + 115)
-		drawPointer(ct, x, height + 125);
+		ct.fillText(currentYear, x - wd / 2, height + (ht+15))
+		drawPointer(ct, x, height + (ht+25));
 	}
 }
 
@@ -1642,18 +1912,18 @@ function createSlider(opts) {
 		let infoDiv = document.getElementById("infoDiv");
 		let infoBut = createDiv("infoBut" + id, "infoBut");
 		infoBut.innerHTML = "i";
-		let infoSpan = createDiv("infoSpan" + id, "infoSpan");
-		infoSpan.innerHTML = infoTxt
+		//let infoSpan = createDiv("infoSpan" + id, "infoSpan");
+		//infoSpan.innerHTML = infoTxt
 
 		infoBut.addEventListener("mouseenter", function() {
-			infoDiv.innerHTML = infoSpan.innerHTML;
+			infoDiv.innerHTML = opts.infoTxt;
 			infoDiv.style.opacity = 1;
 		})
 		infoBut.addEventListener("mouseleave", function() {
-			infoDiv.innerHTML = infoSpan.innerHTML;
+			infoDiv.innerHTML = opts.infoTxt;
 			infoDiv.style.opacity = 0;
 		})
-		cont.appendChild(infoSpan);
+		//cont.appendChild(infoSpan);
 		cont.appendChild(infoBut);
 	}
 
@@ -1757,13 +2027,35 @@ function createSlider(opts) {
 	};
 }
 
-function createSwitchClick(opts) { // id, label, choices, chosen
+function createToggleClick(opts) { //id, label, 
+
+}
+function createSwitchClick(opts) { // id, label, choices, chosen, infoTxt
 	let cont = createDiv(opts.id, "switchCont")
 	let contTitle = createDiv(opts.id + "Title", "contTitle", {
 		innerHTML: opts.label
 	})
 	cont.appendChild(contTitle)
 	let choices = [];
+	if (opts.infoTxt) {
+		let infoDiv = document.getElementById("infoDiv");
+		let infoBut = createDiv("infoBut" + opts.id, "infoBut");
+		infoBut.innerHTML = "i";
+		//let infoSpan = createDiv("infoSpan" + opts.id, "infoSpan");
+		//infoSpan.innerHTML = opts.infoTxt
+
+		infoBut.addEventListener("mouseenter", function() {
+			infoDiv.innerHTML = opts.infoTxt;
+			infoDiv.style.opacity = 1;
+
+		})
+		infoBut.addEventListener("mouseleave", function() {
+			infoDiv.innerHTML = opts.infoTxt;
+			infoDiv.style.opacity = 0;
+		})
+		//cont.appendChild(infoSpan);
+		cont.appendChild(infoBut);
+	}
 	for (let key in opts.choices) {
 		let choice = createDiv(opts.id + key, "switchChoice", {
 			innerHTML: opts.choices[key].label,
@@ -1773,7 +2065,6 @@ function createSwitchClick(opts) { // id, label, choices, chosen
 					if ($("#" + opts.id + kei).hasClass("chosen")) {
 						$("#" + opts.id + kei).removeClass("chosen");
 						if (opts.choices[kei].hasOwnProperty("uncallback")) {
-							console.log(choices, kei)
 							opts.choices[kei].uncallback();
 						}
 					}

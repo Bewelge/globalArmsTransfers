@@ -6,6 +6,7 @@ html, body {
 	overflow-x:hidden;
 	font-size: 14px;
 	font-family: Arial;
+	transition: all 0.4s ease-out;
 }
 #mainTitle {
 	height:35px !important;
@@ -28,9 +29,11 @@ html, body {
 	font-size: 12px;
 }
 #infoDiv {
-	position: absolute;
+	position: fixed;
 	padding:2em;
-	bottom:25%;
+	pointer-events: none;
+	bottom:0;
+	overflow-y:scroll;
 	width:80%;
 	left:10%;
 	background-color: rgba(250,250,250,0.9);
@@ -52,8 +55,9 @@ html, body {
 	position: absolute;
 	right: 5px;
 	top: 1px;
-	width:20px;
-	height:20px;
+	width:15px;
+	height:15px;
+	box-sizing: border-box;
 	background-color: rgba(250,250,250,0.2);
 	border-radius: 10px;
 
@@ -97,6 +101,11 @@ html, body {
 	display: none;
 }
 .resetBut {
+
+	cursor: pointer;
+}
+.resetBut:hover {
+	background-color: rgba(0,0,0,0.1);
 	cursor: pointer;
 }
 #resetButton {
@@ -144,11 +153,16 @@ html, body {
 	position: absolute;
 	left:2.5px;
 	top:2.5px;
+	border-radius: 12.5px;
+}
+.sp-preview, .sp-alpha, .sp-thumb-el {
+	background-image: none !important;
 }
 .sp-preview {
 	height:25px !important;
 	width:25px !important;
 	margin:0px !important;
+	border: none !important;
 }
 .sp-preview-inner {
 	height:25px !important;
@@ -181,19 +195,23 @@ html, body {
 	text-align: center;
 }
 .switchCont {
+	position: relative;
 	float:left;
 	padding:0.2em;
   margin:0.2em;
+  width:125px;
+  height:110px;
 	background-color: rgba(0,0,0,0.4);
   border:1px solid rgba(255,255,255,0.3);
 }
 .switchChoice {
-	float:left;
+	/*float:left;*/
 	background-color: rgba(0,0,0,0.2);
-	margin:0.1em;
+	margin-top:0.3em;
 	padding:0.1em;
-	height:50px;
-	width:50px;
+	/*height:50px;*/
+	width:80%;
+	margin-left:10%;
 	padding:5px;
 	box-sizing: border-box;
 	border-radius: 0.2em;
@@ -205,6 +223,7 @@ html, body {
 }
 .switchChoice.chosen {
 	background-color: rgba(255,255,255,0.4);
+	box-shadow: inset 0em 0em 0.2em 0.2em rgba(255,255,255,0.5);
 }
 .contContainer {
 	width:300px;
@@ -253,16 +272,18 @@ html, body {
 	left: 210px;
 	top:130px;
 	max-height:200px;
-	max-width:200px;
-	background-color: rgba(0,0,0,0.2);
+	max-width:75px;
 }
 .legendCountry {
 	position: relative;
+	overflow: hidden;
 	float:left;
-	width:100px;
+	width:75px;
 	font-size: 10px;
 	box-sizing: border-box;
-	background-color:rgba(0,0,0,0.1);
+	background-color:rgba(250,250,250,0.4);
+	border-radius: 0.5em;
+	margin-bottom:0.1em;
 }
 .chosenCountry:hover {
 	background-color:rgba(0,0,0,0.2);
