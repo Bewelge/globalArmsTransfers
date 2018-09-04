@@ -252,7 +252,7 @@ function loadJSONS(callback) {
 					}
 				}
 				//draw country names on map. Too cluttery
-				ctx2.fillStyle="black";
+				/*ctx2.fillStyle="black";
 				ctx2.font = "6px Arial black";
 				for (let key in allCountriesByVolume) {
 					if (key != "Switzerland") continue
@@ -265,7 +265,7 @@ function loadJSONS(callback) {
 						ctx2.fillRect(pos.x-2,pos.y-2,4,4)
 					
 					
-				}
+				}*/
 				callback();
 			})
 		})
