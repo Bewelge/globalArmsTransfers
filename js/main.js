@@ -58,9 +58,9 @@ let ticksPerYear = 150;
 let maxDots = 50000; // internal cap — WebGL handles this comfortably (no UI setting)
 let valueDenominator = 3;
 let dotRad = 3;
-let arcRandomness = 12;
+let arcRandomness = 50;
 let dotSpeed = 50;
-let turbulence = 34;               // noise flow-field amplitude (px)
+let turbulence = 5;                // noise flow-field amplitude (px)
 let spawnMode = "value";           // "value" | "volume"
 let dotRenderMode = "shader";      // "shader" (procedural) | "texture" (circle_05.png)
 
@@ -146,7 +146,8 @@ const EVENTS = [
 	{ name: "Fall of the Berlin Wall",    start: 1989, end: 1989, cat: "political", lon: 13.4,  lat: 52.5 },
 	{ name: "Gulf War",                   start: 1990, end: 1991, cat: "war",       lon: 47.9,  lat: 29.4 },
 	{ name: "Dissolution of the USSR",    start: 1991, end: 1991, cat: "political", lon: 37.6,  lat: 55.8 },
-	{ name: "Yugoslav Wars",              start: 1991, end: 1999, cat: "war",       lon: 17.7,  lat: 43.9 },
+	{ name: "Yugoslav Wars",              start: 1991, end: 2001, cat: "war",       lon: 16.0,  lat: 45.4 },
+	{ name: "Bosnian War",                start: 1992, end: 1995, cat: "war",       lon: 17.9,  lat: 44.0 },
 	{ name: "Rwandan Genocide",           start: 1994, end: 1994, cat: "crisis",    lon: 30.1,  lat: -1.9 },
 	{ name: "Kosovo War",                 start: 1998, end: 1999, cat: "war",       lon: 21.0,  lat: 42.6 },
 	// --- 21st century ---
@@ -154,12 +155,14 @@ const EVENTS = [
 	{ name: "War in Afghanistan",         start: 2001, end: 2021, cat: "war",       lon: 67.5,  lat: 33.5 },
 	{ name: "Iraq War",                   start: 2003, end: 2011, cat: "war",       lon: 44.4,  lat: 33.3 },
 	{ name: "Russo-Georgian War",         start: 2008, end: 2008, cat: "war",       lon: 43.5,  lat: 42.0 },
-	{ name: "Arab Spring",                start: 2011, end: 2011, cat: "political", lon: 9.5,   lat: 34.0 },
-	{ name: "Libyan Civil War",           start: 2011, end: 2011, cat: "war",       lon: 17.0,  lat: 27.0 },
-	{ name: "Syrian Civil War",           start: 2011, end: ONGOING, cat: "war",    lon: 38.5,  lat: 35.0 },
+	{ name: "Arab Spring",                start: 2010, end: 2012, cat: "political", lon: 9.5,   lat: 34.0 },
+	{ name: "First Libyan Civil War",     start: 2011, end: 2011, cat: "war",       lon: 17.0,  lat: 27.0 },
+	{ name: "Syrian Civil War",           start: 2011, end: 2024, cat: "war",       lon: 38.5,  lat: 35.0 },
+	{ name: "Syrian transition",          start: 2024, end: ONGOING, cat: "political", lon: 39.2, lat: 35.4 },
 	{ name: "Annexation of Crimea",       start: 2014, end: 2014, cat: "crisis",    lon: 34.5,  lat: 45.3 },
 	{ name: "Yemen Civil War",            start: 2014, end: ONGOING, cat: "war",    lon: 47.5,  lat: 15.5 },
-	{ name: "Nagorno-Karabakh War",       start: 2020, end: 2020, cat: "war",       lon: 46.7,  lat: 39.8 },
+	{ name: "2nd Nagorno-Karabakh War",   start: 2020, end: 2020, cat: "war",       lon: 46.7,  lat: 39.8 },
+	{ name: "Azerbaijani Karabakh offensive", start: 2023, end: 2023, cat: "war",   lon: 46.7,  lat: 39.8 },
 	{ name: "Russia invades Ukraine",     start: 2022, end: ONGOING, cat: "war",    lon: 32.0,  lat: 49.0 },
 	{ name: "Israel–Hamas / Gaza war",    start: 2023, end: ONGOING, cat: "war",    lon: 34.4,  lat: 31.4 },
 	// --- Treaties & embargoes (explain dips; geo ones labelled, treaties timeline-only) ---
