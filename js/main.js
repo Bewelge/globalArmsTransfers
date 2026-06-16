@@ -38,6 +38,7 @@ let mapW = 0, mapH = 0;      // scaled map dimensions (map-local drawing space)
 let offsetX = 0, offsetY = 0; // top-left of the map within the viewport
 let mapScale = 1;            // mapW / MAP_NATIVE_W
 let dotSizeScale = 1;        // shrinks dots on small maps (1 on desktop, < 1 on phones)
+let speedScale = 1;          // scales dot travel with map size so crossing time is constant
 
 // Data
 let countryLocations = {};
@@ -262,6 +263,8 @@ function layout() {
 	offsetY = (availH - mapH) / 2;
 	// Dots keep their size on desktop-ish maps, shrink on small ones.
 	dotSizeScale = Math.max(0.4, Math.min(1, mapScale / 1.5));
+	// Travel speed scales with the map so dots take the same time to cross any screen.
+	speedScale = mapScale / 1.5;
 
 	dpr = Math.min(window.devicePixelRatio || 1, 2);
 	for (const cnv of [mapCanvas, glCanvas, fxCanvas]) {
@@ -1267,7 +1270,7 @@ function packFlyingDots(n) {
 		for (let k = arr.length - 1; k >= 0; k--) {
 			const d = arr[k];
 			if (d[13] !== undefined) continue;          // landed -> handled in pass 1
-			d[1] += Math.max(3, (d[2] - d[1]) / 50) * dotSpeed / 50 * d[11];
+			d[1] += Math.max(3 * speedScale, (d[2] - d[1]) / 50) * dotSpeed / 50 * d[11];
 			if (d[1] > d[2]) {
 				addGlow(d[10], key, rgb.r * 255, rgb.g * 255, rgb.b * 255);
 				if (ripples.length < RIPPLE_CAP) {
