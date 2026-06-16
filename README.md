@@ -3,9 +3,9 @@ An Interactive visualisation of global arms transfers from 1950 to 2017
 
 ---
 
-## 2026 overhaul (built with Claude Code)
+## 2026 overhaul (built with AI-tools)
 
-Project was substantially reworked with the help of Claude Code
+Project was substantially reworked with the help of AI-tools
 The original 2017 version is preserved, unchanged, on the
 [**`Original` branch**](https://github.com/Bewelge/globalArmsTransfers/tree/Original) 
 
@@ -15,6 +15,8 @@ This was updated:
 
 The SIPRI Arms Transfers data was re-fetched and rebuilt from the per-year trade-register
 exports, extending coverage from 1950–2017 to **1950–2025**.
+
+> Source: SIPRI Arms Transfers Database — <https://doi.org/10.55163/SAFC1241>
 
 **New consolidations**
 

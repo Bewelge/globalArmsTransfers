@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,6 +11,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="interface.css">
 </head>
+
 <body>
 	<!-- Render layers -->
 	<canvas id="mapCanvas"></canvas>
@@ -54,7 +56,8 @@
 
 			<div class="field">
 				<label>Countries <span id="chosenCount" class="muted"></span></label>
-				<input type="text" id="countrySearch" class="search" placeholder="Search to add a supplier…" autocomplete="off">
+				<input type="text" id="countrySearch" class="search" placeholder="Search to add a supplier…"
+					autocomplete="off">
 				<div id="countryList" class="picklist"></div>
 				<div id="chosenList" class="chips"></div>
 			</div>
@@ -74,24 +77,47 @@
 		<button id="closeDescription" aria-label="Close">×</button>
 		<h2>About this visualisation</h2>
 		<p>This visualisation shows global arms transfers from 1950–2025. Pick any set of supplier
-		countries and watch coloured dots flow along arcs from each supplier to its recipients,
-		year by year. Each dot represents a slice of the transfer's value (TIV); when a dot reaches a
-		recipient, that country briefly lights up.</p>
+			countries and watch coloured dots flow along arcs from each supplier to its recipients,
+			year by year. Each dot represents a slice of the transfer's value (TIV); when a dot reaches a
+			recipient, that country briefly lights up.</p>
 		<p>Heavily inspired by this video by Will Geary (@wgeary) —
-		<a href="https://vimeo.com/286751571" target="_blank" rel="noopener">vimeo.com/286751571</a>.</p>
+			<a href="https://vimeo.com/286751571" target="_blank" rel="noopener">vimeo.com/286751571</a>.
+		</p>
 		<p>The dataset is from SIPRI, the Stockholm International Peace Research Institute —
-		<a href="https://www.sipri.org/databases/armstransfers" target="_blank" rel="noopener">sipri.org/databases/armstransfers</a>.
-		The SVG world map is from <a href="https://www.amcharts.com/svg-maps/?map=world" target="_blank" rel="noopener">amCharts</a>.</p>
+			<a href="https://www.sipri.org/databases/armstransfers" target="_blank"
+				rel="noopener">sipri.org/databases/armstransfers</a>
+			(SIPRI Arms Transfers Database, <a href="https://doi.org/10.55163/SAFC1241" target="_blank"
+				rel="noopener">doi.org/10.55163/SAFC1241</a>).
+			The SVG world map is from <a href="https://www.amcharts.com/svg-maps/?map=world" target="_blank"
+				rel="noopener">amCharts</a>.
+		</p>
 		<p>Found a bug or have a suggestion? Open an issue on the
-		<a href="https://github.com/bewelge/globalArmsTransfers" target="_blank" rel="noopener">GitHub repo</a>.</p>
+			<a href="https://github.com/bewelge/globalArmsTransfers" target="_blank" rel="noopener">GitHub repo</a>.
+		</p>
 
 		<h3>Dataset cleaning</h3>
 		<p class="muted">Removed: deals with unknown supplier/recipient, multi-seller deals without
-		specification, and deals involving the UN, NATO, RSSS, OSCE &amp; the African Union.</p>
+			specification, and deals involving the UN, NATO, RSSS, OSCE &amp; the African Union.</p>
 		<p class="muted">Consolidated sub-state groups and historical entities into present-day
-		countries (e.g. Soviet Union → Russia, Viet Cong / Viet Minh → Vietnam, UNITA → Angola).</p>
+			countries (e.g. Soviet Union → Russia, Viet Cong / Viet Minh → Vietnam, UNITA → Angola).</p>
+
+		<h3>2026 overhaul (built with AI-tools)</h3>
+		<p>This version was substantially reworked with the help of AI-tools,
+			The original 2017 version is preserved, unchanged, on the
+			<a href="https://github.com/Bewelge/globalArmsTransfers/tree/Original" target="_blank"
+				rel="noopener">Original branch</a>.
+		</p>
+		<p class="muted"><b>Dataset updated to 1950–2025</b> — re-fetched and rebuilt from SIPRI's
+			per-year trade registers (was 1950–2017), with new consolidations: modern spellings and
+			historical entities (e.g. Turkiye → Turkey, Czechia → Czech Republic, unified Germany →
+			Germany (FRG)) and additional non-state / faction groups folded into their host country
+			(e.g. PLO / Hamas → Palestine, RSF / SPLA → Sudan, Houthi rebels → Yemen).</p>
+		<p class="muted"><b>Frontend ported to WebGL</b> — the dots now render on the GPU (replacing
+			the original Canvas2D + jQuery + Spectrum stack), with a full-screen responsive map and a
+			draggable timeline.</p>
 	</div>
 
 	<script type="text/javascript" src="js/main.js"></script>
 </body>
+
 </html>
