@@ -1,6 +1,51 @@
 # globalArmsTransfers
 An Interactive visualisation of global arms transfers from 1950 to 2017
 
+---
+
+## 2026 overhaul (built with Claude Code)
+
+Project was substantially reworked with the help of Claude Code
+The original 2017 version is preserved, unchanged, on the
+[**`Original` branch**](https://github.com/Bewelge/globalArmsTransfers/tree/Original) 
+
+This was updated:
+
+### Dataset updated to 1950–2025
+
+The SIPRI Arms Transfers data was re-fetched and rebuilt from the per-year trade-register
+exports, extending coverage from 1950–2017 to **1950–2025**.
+
+**New consolidations**
+
+- **Modern spellings / historical entities:** Turkiye → Turkey, North Macedonia → Macedonia,
+  United Arab Emirates → UAE, Czechia → Czech Republic, Bosnia-Herzegovina → Bosnia and
+  Herzegovina, Cabo Verde → Cape Verde, eSwatini → Swaziland,
+  Yemen Arab Republic (North Yemen) → North Yemen, Katanga → DR Congo, and unified
+  Germany → Germany (FRG) (reusing the original FRG map shape/location key).
+- **Additional non-state / faction groups → host country:** Darfur rebels / RSF / SPLA → Sudan;
+  PLO / Hamas / Palestinian Islamic Jihad / PRC → Palestine; House of Representatives & NTC → Libya;
+  EPLF → Ethiopia; FAN → Chad; MPLA → Angola; FRELIMO → Mozambique; PAIGC → Guinea-Bissau;
+  Kurdistan Regional Government → Iraq; LRA → Uganda; MNLF → Philippines; United Wa State → Myanmar;
+  NLA → Macedonia; Pathet Lao → Laos; PKK → Turkey; Provisional IRA → United Kingdom; RPF → Rwanda;
+  RUF → Sierra Leone; Houthi & Southern rebels → Yemen.
+- **Dropped entirely**  the African Union, European Union, NATO, OSCE,
+  Regional Security System and United Nations, plus unknown supplier/recipient/rebel entries.
+
+### Frontend ported to WebGL
+
+The animation was rewritten from the original Canvas2D + jQuery + Spectrum stack into a
+dependency-free WebGL-based version:
+
+- **WebGL dot renderer** 
+- **Full-screen, responsive map** 
+- **draggable timeline**
+
+
+---
+
+_The original README follows, unchanged._
+
 * Heavily inspired by Will Geary's (@wgeary) Video - https://vimeo.com/286751571
 
 

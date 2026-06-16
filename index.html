@@ -1,121 +1,97 @@
 <!DOCTYPE html>
-<html>
-<head >
+<html lang="en">
+<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Arms Sales Visualization - Bewelge</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Global Arms Transfers — Bewelge</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="interface.css">
-
-	<script type="text/javascript" src="lib/jquery-3.3.1.js"></script>
-	<link rel="stylesheet" href="lib/spectrum.css"></link>
-	<script type="text/javascript" src="lib/spectrum.js"></script>
-	
 </head>
 <body>
-	<div style='position:relative'>
+	<!-- Render layers -->
+	<canvas id="mapCanvas"></canvas>
+	<canvas id="glCanvas"></canvas>
+	<canvas id="fxCanvas"></canvas>
 
-</div>
-	
-		<div id="mainTitle">Arms Sales Visualization 
-			<div id="subTitle">
-				<div><a href="http://github.com/bewelge/globalArmsTransfers">Code on Github</br>by Bewelge</a></div>
-				<!-- <div><a href="http://github.com/bewelge">by Bewelge</a></div> -->
+	<!-- Floating top bar -->
+	<header id="topbar">
+		<div id="title">Global Arms Transfers
+			<span id="subtitle">1950–2025 · SIPRI</span>
+		</div>
+		<nav id="toplinks">
+			<a id="descriptionLink" href="#">About</a>
+			<a href="https://github.com/bewelge/globalArmsTransfers" target="_blank" rel="noopener">GitHub</a>
+		</nav>
+	</header>
+
+	<!-- Floating control panel -->
+	<section id="panel" class="glass">
+		<button id="panelToggle" title="Collapse / expand panel" aria-label="Toggle panel">‹</button>
+		<div id="panelBody">
+			<div class="transport">
+				<button id="playBtn" class="btn primary">Play</button>
+				<button id="resetBtn" class="btn">Reset</button>
 			</div>
-				<div id='info' onclick='openDescription()'>Description</div></div>
 
-	
-	
+			<div class="field">
+				<label>Spawn dots by</label>
+				<div id="modeSeg" class="segmented">
+					<button data-mode="value" class="active">Value</button>
+					<button data-mode="volume">Volume</button>
+				</div>
+			</div>
+
+			<div class="field">
+				<label>Year range <span id="yearRangeLabel" class="muted"></span></label>
+				<div class="rangeRow">
+					<input type="range" id="startYear" min="1949" max="2024" step="1" value="1950">
+					<input type="range" id="endYear" min="1950" max="2025" step="1" value="2025">
+				</div>
+			</div>
+
+			<div class="field">
+				<label>Countries <span id="chosenCount" class="muted"></span></label>
+				<input type="text" id="countrySearch" class="search" placeholder="Search to add a supplier…" autocomplete="off">
+				<div id="countryList" class="picklist"></div>
+				<div id="chosenList" class="chips"></div>
+			</div>
+
+			<details id="advanced">
+				<summary>Advanced</summary>
+				<div class="adv-body"></div>
+			</details>
+		</div>
+	</section>
+
+	<!-- Hover hint for sliders / info -->
 	<div id="infoDiv"></div>
-	<div id="descriptionDiv">
-		<div id='closeDescription' onclick="closeDescription()">x</div>
-		This Visualisation shows global arms transfers from 1950-2017. 
-		</br>
-		</br>
-		It was heavily inspired by this Video by Will Geary's (@wgeary) - <a href="https://vimeo.com/286751571">https://vimeo.com/286751571</a>
-		</br>
-		</br>
-		Since I wanted to see how other countries that are known to be large arms-exporters would look in such an animation, I decided to create an interactive version in which you can select any countries you want to be displayed. 
-		</br>
-		</br> 
-		The dataset was retrieved from SIPRI - the Stockholm International Peace Research Institue. - <a href="https://www.sipri.org/databases/armstransfers">https://www.sipri.org/databases/armstransfers</a>
-		</br>
-		</br>
-		The SVG world map was retrieved from AMCharts at <a href="https://www.amcharts.com/svg-maps/?map=world">https://www.amcharts.com/svg-maps/?map=world<a>
-		</br>
-		</br>
-		If you have a suggestion or found a bug feel free to open an issue on the <a href="http://github.com/bewelge/globalArmsTransfers"> GitHub Repo.</a>
 
-		</br>
-		</br>
-		</br>
-	
-	<b>Cleaned dataset by removing:</b>
+	<!-- About overlay -->
+	<div id="descriptionDiv" class="glass">
+		<button id="closeDescription" aria-label="Close">×</button>
+		<h2>About this visualisation</h2>
+		<p>This visualisation shows global arms transfers from 1950–2025. Pick any set of supplier
+		countries and watch coloured dots flow along arcs from each supplier to its recipients,
+		year by year. Each dot represents a slice of the transfer's value (TIV); when a dot reaches a
+		recipient, that country briefly lights up.</p>
+		<p>Heavily inspired by this video by Will Geary (@wgeary) —
+		<a href="https://vimeo.com/286751571" target="_blank" rel="noopener">vimeo.com/286751571</a>.</p>
+		<p>The dataset is from SIPRI, the Stockholm International Peace Research Institute —
+		<a href="https://www.sipri.org/databases/armstransfers" target="_blank" rel="noopener">sipri.org/databases/armstransfers</a>.
+		The SVG world map is from <a href="https://www.amcharts.com/svg-maps/?map=world" target="_blank" rel="noopener">amCharts</a>.</p>
+		<p>Found a bug or have a suggestion? Open an issue on the
+		<a href="https://github.com/bewelge/globalArmsTransfers" target="_blank" rel="noopener">GitHub repo</a>.</p>
 
-		<li> All deals where Supplier or Recipient is unknown.</li>
-		<li> All deals which had multiple sellers without specification which. </li>
-		<li> Deals with the UN, NATO, Regional Security System (RSSS), OSCE & African Union as seller or buyer</li>
-</br>
-</br>
-</br>
-	<b>and consolidating the following groups:</b>
-	<li> Amal (Lebanon)* -> Lebanon</li>
-	<li> ANC (South Africa)* -> South Africa</li>
-	<li> Anti-Castro rebels (Cuba)* -> Cuba</li>
-	<li> Armas (Guatemala) -> Guatemala</li>
-	<li> Biafra -> Nigeria</li>
-	<li> contras (Nicaragua)* -> Nicaragua</li>
-	<li> El Salvador (FMLN) -> El Salvador</li>
-	<li> ELF (Ethiopia)* -> Ethiopia</li>
-	<li> FNLA (Angola)* -> Angola</li>
-	<li> GUNT (Chad)* -> Chad</li>
-	<li> Haiti Rebels -> Haiti</li>
-	<li> Hezbollah (Lebanon)* -> Lebanon</li>
-	<li> Huthi rebels (Yemen)* -> Yemen</li>
-	<li> Indonesia Rebels -> Indonesia</li>
-	<li> Khmer Rouge (Cambodia)* -> Cambodia</li>
-	<li> Lebanon Palestinian rebels* -> Lebanon</li>
-	<li> LF (Lebanon)* -> Lebanon</li>
-	<li> libya GNC -> Libya</li>
-	<li> Libya HoR -> Libya</li>
-	<li> LTTE (Sri Lanka)* -> Sri Lanka</li>
-	<li> Macedonia (FYROM) -> Macedonia</li>
-	<li> MTA (Myanmar)* -> Myanmar</li>
-	<li> Mujahedin (Afghanistan)* -> Afghanistan</li>
-	<li> Northern Alliance (Afghanistan)* -> Afghanistan</li>
-	<li> Northern Cyprus -> Cyprus</li>
-	<li> SLA (Lebanon)* -> Lebanon</li>
-	<li> SNA (Somalia)* -> Somalia</li>
-	<li> Southern rebels (Yemen)* -> Yemen</li>
-	<li> Soviet Union -> Russia</li>
-	<li> Syria Rebels -> Syria</li>
-	<li> UIC (Somalia)* -> Somalia</li>
-	<li> Ukraine Rebels* -> Ukraine</li>
-	<li> UNITA (Angola)* -> Angola</li>
-	<li> Viet Cong -> Vietnam</li>
-	<li> Viet Minh -> Vietnam</li>
-	<li> Viet Nam -> Vietnam</li>
-	<li> ZAPU -> Zimbabwe</li>
- 
-</br></br>
-* Other plugins used: 
-	<li> Color Picker - https://bgrins.github.io/spectrum/ by bgrins</li>
-	<li> jQuery </li>
-
-
-	</div>
-	
-	<div id='legend'></div>
-	
-	<div id='description'> 
-		
+		<h3>Dataset cleaning</h3>
+		<p class="muted">Removed: deals with unknown supplier/recipient, multi-seller deals without
+		specification, and deals involving the UN, NATO, RSSS, OSCE &amp; the African Union.</p>
+		<p class="muted">Consolidated sub-state groups and historical entities into present-day
+		countries (e.g. Soviet Union → Russia, Viet Cong / Viet Minh → Vietnam, UNITA → Angola).</p>
 	</div>
 
-	
 	<script type="text/javascript" src="js/main.js"></script>
-
-	
-	
-	
 </body>
 </html>
