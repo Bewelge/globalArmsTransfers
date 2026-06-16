@@ -37,6 +37,7 @@ let vw = 0, vh = 0;          // viewport
 let mapW = 0, mapH = 0;      // scaled map dimensions (map-local drawing space)
 let offsetX = 0, offsetY = 0; // top-left of the map within the viewport
 let mapScale = 1;            // mapW / MAP_NATIVE_W
+let dotSizeScale = 1;        // shrinks dots on small maps (1 on desktop, < 1 on phones)
 
 // Data
 let countryLocations = {};
@@ -68,8 +69,8 @@ let glow = {};                     // recipient -> { i, r, g, b }
 let ripples = [];                  // arrival craters: { x, y, age, r, g, b }
 const RIPPLE_LIFE = 26;            // frames
 const RIPPLE_CAP = 320;            // max concurrent (subsamples at high density)
-const LAND_LIFE = 34;              // frames a dot lingers & blooms after arriving
-const LAND_GROW = 2.2;             // how much it grows over that time
+const LAND_LIFE = 34;              // frames a landed dot stays before it's removed
+const LAND_BUMP = 1.35;            // landed dots sit a little bigger (held, no grow/fade)
 let ticker = 0;
 let currentYear = startYear;
 let toSpawnThisYear = {};
@@ -259,6 +260,8 @@ function layout() {
 	mapH = MAP_NATIVE_H * mapScale;
 	offsetX = (vw - mapW) / 2;
 	offsetY = (availH - mapH) / 2;
+	// Dots keep their size on desktop-ish maps, shrink on small ones.
+	dotSizeScale = Math.max(0.4, Math.min(1, mapScale / 1.5));
 
 	dpr = Math.min(window.devicePixelRatio || 1, 2);
 	for (const cnv of [mapCanvas, glCanvas, fxCanvas]) {
@@ -1106,8 +1109,9 @@ function spawnDot(country1, country2) {
 	let x2 = recips[country2].arcX;
 	let y2 = recips[country2].arcY;
 	const perp = p1.x < p2.x ? ang - Math.PI * 0.5 : ang + Math.PI * 0.5;
-	x2 += Math.cos(perp) * (arcRandomness * Math.random());
-	y2 += Math.sin(perp) * (arcRandomness * Math.random());
+	const spread = arcRandomness * dotSizeScale; // shrink the arc spread on small maps too
+	x2 += Math.cos(perp) * (spread * Math.random());
+	y2 += Math.sin(perp) * (spread * Math.random());
 
 	// Per-dot variation so the stream doesn't move in lockstep.
 	const speedFactor = 0.65 + Math.random() * 0.8;        // ~0.65–1.45
@@ -1201,8 +1205,8 @@ function draw() {
 // `start` is the next free index in the GL buffers. Returns the new total count.
 function appendRipples(start) {
 	let n = start;
-	const minR = dotRad * 0.6;
-	const maxR = 9 * mapScale + dotRad;
+	const minR = dotRad * 0.6 * dotSizeScale;
+	const maxR = 9 * mapScale + dotRad * dotSizeScale;
 	for (let i = ripples.length - 1; i >= 0; i--) {
 		const rp = ripples[i];
 		rp.age++;
@@ -1234,14 +1238,13 @@ function packBlooms(n) {
 			const d = arr[k];
 			if (d[13] === undefined) continue;          // still flying -> pass 2
 			if (!rgb || d[13] >= LAND_LIFE) { arr.splice(k, 1); continue; }
-			const lt = d[13] / LAND_LIFE;
 			posArr[n * 2] = d[5];
 			posArr[n * 2 + 1] = d[6];
 			colArr[n * 3] = rgb.r;
 			colArr[n * 3 + 1] = rgb.g;
 			colArr[n * 3 + 2] = rgb.b;
-			sizeArr[n] = d[9] * 2 * dpr * (1 + lt * LAND_GROW); // grows as it lingers
-			parArr[n * 2] = lt;      // life -> fade
+			sizeArr[n] = d[9] * 2 * dpr * dotSizeScale * LAND_BUMP; // held a touch bigger, no growth
+			parArr[n * 2] = 0;       // (life unused now — no fade)
 			parArr[n * 2 + 1] = 0;
 			kindArr[n] = 2;          // arrival bloom
 			n++;
@@ -1280,7 +1283,7 @@ function packFlyingDots(n) {
 			colArr[n * 3] = rgb.r;
 			colArr[n * 3 + 1] = rgb.g;
 			colArr[n * 3 + 2] = rgb.b;
-			sizeArr[n] = d[9] * 2 * dpr;
+			sizeArr[n] = d[9] * 2 * dpr * dotSizeScale;
 			parArr[n * 2] = t;       // progress 0..1 (turbulence envelope)
 			parArr[n * 2 + 1] = d[12]; // per-dot seed
 			kindArr[n] = 0;          // dot
@@ -1389,7 +1392,7 @@ const DOT_FS = `
 			if (u_useTex > 0.5) ab = texture2D(u_tex, gl_PointCoord).a;
 			else { if (d >= 1.0) discard; ab = 1.0 - smoothstep(0.35, 1.0, d); }
 			float bcore = 1.0 - smoothstep(0.0, 0.45, d);
-			ab = clamp(ab * 0.95 + bcore * 0.4, 0.0, 1.0) * (1.0 - v_life * v_life);
+			ab = clamp(ab * 0.95 + bcore * 0.4, 0.0, 1.0); // held at full opacity, no fade
 			if (ab <= 0.003) discard;
 			gl_FragColor = vec4(mix(v_color, vec3(1.0), bcore * 0.3), ab);
 			return;
@@ -1509,7 +1512,7 @@ function drawDotsGL(count) {
 	gl.uniform2f(glLoc.u_offset, offsetX, offsetY);
 	gl.uniform1f(glLoc.u_dpr, dpr);
 	gl.uniform1f(glLoc.u_time, (performance.now() - glStartTime) / 1000);
-	gl.uniform1f(glLoc.u_turb, turbulence);
+	gl.uniform1f(glLoc.u_turb, turbulence * dotSizeScale);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, glPosBuf);
 	gl.bufferData(gl.ARRAY_BUFFER, posArr.subarray(0, count * 2), gl.DYNAMIC_DRAW);
